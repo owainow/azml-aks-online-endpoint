@@ -61,7 +61,7 @@ jobs:
         run: |
           az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
           az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
-          az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.2.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
+          az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
 
 
       - name: Create AKS Cluster
