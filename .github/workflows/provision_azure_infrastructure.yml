@@ -63,6 +63,10 @@ jobs:
           az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
           az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
 
+      - name: Get runner IP address
+        run: |
+            export runner_ip="$(curl -s https://api.ipify.org)"
+            echo "runner_ip=$runner_ip" >> $GITHUB_ENV
 
       - name: Create AKS Cluster
         env: 
@@ -81,6 +85,7 @@ jobs:
           --service-cidr 10.2.0.0/24 \
           --enable-managed-identity \
           --generate-ssh-keys
+          --api-server-authorized-ip-ranges $runner_ip
 
       - name: Get KubeConfig
         env: 
