@@ -84,7 +84,7 @@ jobs:
           --dns-service-ip 10.2.0.10 \
           --service-cidr 10.2.0.0/24 \
           --enable-managed-identity \
-          --generate-ssh-keys
+          --generate-ssh-keys \
           --api-server-authorized-ip-ranges $runner_ip
 
       - name: Get KubeConfig
