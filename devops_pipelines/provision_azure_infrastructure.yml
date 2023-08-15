@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: write-all
 
+
     
     # Set the working directory to main for the config files
     defaults:
@@ -27,6 +28,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+          # Install packages
+      - name: Install required packages.
+        run: apt-get install sudo -y && apt-get update && apt-get install unzip -y && apt-get install vim -y && apt-get install python3 -y &&  sudo apt-get install jq -y && apt-get install -y gettext-base && sudo apt-get install npm -y && curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && az aks install-cli | sudo bash
       
       - name: Generate runner url from secret
         run: |
@@ -40,8 +44,134 @@ jobs:
             echo "GH_runner_token=$token" >> $GITHUB_ENV
      
 
-      # Run Terraform Apply with Auto Approve
-      - name: Terraform Apply for Intial Terraform Config
-        working-directory: /home/runner/work/aks-zero-trust-demo/aks-zero-trust-demo/Terraform/Intial_Terraform
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Create Resource Group
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+            az group create --name $RESOURCE_GROUP --location eastus
+      
+      - name: Create VNET and Subnet
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
+          az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
+          az network vnet subnet create  --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --name azml-aks-online-endpoint-subnet  --address-prefixes 10.2.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
+
+
+      - name: Create AKS Cluster
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+         SUBNET=$(az network vnet subnet list --subscription $subscription_name --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
+         az aks create \
+          --resource-group $RESOURCE_GROUP \
+          --name azml-aks-online-endpoint-cluster \
+          --load-balancer-sku standard \
+          --enable-private-cluster \
+          --network-plugin azure \
+          --vnet-subnet-id <subnet-id> \
+          --docker-bridge-address 172.17.0.1/16 \
+          --dns-service-ip 10.2.0.10 \
+          --service-cidr 10.2.0.0/24 
+
+      - name: Install AZ ML CLI Extenstion 
+        run: |
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
+            az extension add -n ml -y
+
+      - name: Setup AZML workspace
+        env:
+          WORKSPACE: azml-aks-online-endpoint-workspace
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          LOCATION: eastus 
+        run: |
+            az ml workspace create -n $WORKSPACE -g $RESOURCE_GROUP -l $LOCATION
+            az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
+
+      - name: Clone model training repository
+        run: |
+            git clone --depth 1 https://github.com/Azure/azureml-examples
+     
+      - name: Create training managed compute
+        run: |
+            az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
+      
+      - name: Train example model
+        run: |
+           run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
   
+      - name: Register the model
+        run: |
+          az ml model create -n sklearn-iris-example -v 1 -p runs:/$run_id/model --type mlflow_model
+      
+      - name: Add preview extension
+        run: |
+          az extension add --name aks-preview
+          az extension update --name aks-preview
+
+      - name: Register and install the GPU Extenstion
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+           az feature register --namespace "Microsoft.ContainerService" --name "GPUDedicatedVHDPreview"
+           az provider register --namespace Microsoft.ContainerService
+
+      - name: Register and install the Azure ML CLI extension
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+           az k8s-extension create --name azml-aks-online --extension-type Microsoft.AzureML.Kubernetes --config enableTraining=True enableInference=True inferenceRouterServiceType=LoadBalancer allowInsecureConnections=True InferenceRouterHA=False --cluster-type managedClusters --cluster-name azml-aks-online-endpoint-cluster --resource-group $RESOURCE_GROUP --scope cluster
+     
+      - name: Create GPU Nodepool for Model 1
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+         az aks nodepool add \
+         --resource-group $RESOURCE_GROUP \
+         --cluster-name azml-aks-online-endpoint-cluster \
+         --name gpu-model1 \
+         --node-count 1 \
+         --node-vm-size Standard_NCASv3_T4  \
+         --labels gpu=yes costcenter=5000 model=model1 \
+         --aks-custom-headers UseGPUDedicatedVHD=true \
+         --enable-cluster-autoscaler \
+         --min-count 1 \
+         --max-count 3
+
+      - name: Create GPU Nodepool for Model 2
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+         az aks nodepool add \
+         --resource-group $RESOURCE_GROUP \
+         --cluster-name azml-aks-online-endpoint-cluster \
+         --name gpu-model2 \
+         --node-count 1 \
+         --node-vm-size Standard_NCASv3_T4  \
+         --labels gpu=yes costcenter=6000 model=model2 \
+         --aks-custom-headers UseGPUDedicatedVHD=true \
+         --enable-cluster-autoscaler \
+         --min-count 1 \
+         --max-count 3
+
+      - name:
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml-aks-online-endpoint-workspace
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        run: |
+         az ml compute attach --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --type Kubernetes --name azml-aks-online-endpoint-compute --resource-id "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.ContainerService/managedclusters/azml-aks-online-endpoint-cluster" --identity-type SystemAssigned --namespace <Kubernetes namespace to run Azure Machine Learning workloads> --no-wait
+      
+      - name:
+        env:
+          ENDPOINT_NAME: azml-aks-online-endpoint
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azureml-examples/cli/
+        run: |
+          az ml online-endpoint create --name $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml
+          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f endpoints/online/managed/sample/blue-deployment.yml --all-traffic
