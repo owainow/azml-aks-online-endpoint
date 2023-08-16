@@ -124,7 +124,7 @@ jobs:
             ls -lar
       
       - name: Train example model
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azureml-examples/cli/
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
         run: |
            run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
 
@@ -193,7 +193,7 @@ jobs:
       - name: Create ML Endpoint with AKS backend
         env:
           ENDPOINT_NAME: azml-aks-online-endpoint
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azureml-examples/cli/
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
         run: |
           az ml online-endpoint create --name $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml
           az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f endpoints/online/managed/sample/blue-deployment.yml --all-traffic
