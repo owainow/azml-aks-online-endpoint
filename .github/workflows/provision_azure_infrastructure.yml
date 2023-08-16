@@ -78,7 +78,6 @@ jobs:
           --resource-group $RESOURCE_GROUP \
           --name azml-aks-online-endpoint-cluster \
           --load-balancer-sku standard \
-          --enable-private-cluster \
           --network-plugin azure \
           --vnet-subnet-id $SUBNET \
           --dns-service-ip 10.2.0.10 \
