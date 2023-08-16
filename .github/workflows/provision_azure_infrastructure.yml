@@ -117,17 +117,14 @@ jobs:
       - name: Create training managed compute
         run: |
             az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
-      
-      - name: DEBUG PWD
-        run: |
-            pwd
-            ls -lar
+    
       
       - name: Train example model
         working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
         run: |
-           run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
-
+           export run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
+           echo "run_id=$run_id" >> $GITHUB_ENV
+           
       - name: Register the model
         run: |
           az ml model create -n sklearn-iris-example -v 1 -p runs:/$run_id/model --type mlflow_model
