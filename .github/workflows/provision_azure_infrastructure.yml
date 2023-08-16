@@ -130,9 +130,11 @@ jobs:
           WORKSPACE: azml_aks_online_endpoint_ws
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
-          until $(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus) == "Completed"; do
+          export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+          until [ "$jobstatus" = "Completed" ]; do
             echo "Waiting for job to finish"
             sleep 10
+            export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
           done
 
       - name: Register the model
