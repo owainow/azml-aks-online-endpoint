@@ -119,6 +119,7 @@ jobs:
             az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
       
       - name: Train example model
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azureml-examples/cli/
         run: |
            run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
 
