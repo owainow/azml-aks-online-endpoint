@@ -103,7 +103,7 @@ jobs:
 
       - name: Setup AZML workspace
         env:
-          WORKSPACE: azml_aks_online_endpoint_workspace
+          WORKSPACE: azml_aks_online_endpoint_wrkspce
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           LOCATION: eastus 
         run: |
