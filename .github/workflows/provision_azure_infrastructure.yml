@@ -118,6 +118,11 @@ jobs:
         run: |
             az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
       
+      - name: DEBUG PWD
+        run: |
+            pwd
+            ls -lar
+      
       - name: Train example model
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azureml-examples/cli/
         run: |
