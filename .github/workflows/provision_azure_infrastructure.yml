@@ -103,7 +103,7 @@ jobs:
 
       - name: Setup AZML workspace
         env:
-          WORKSPACE: azml_aks_online_endpoint_wrkspce
+          WORKSPACE: azml_aks_online_endpoint_ws
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           LOCATION: eastus 
         run: |
@@ -124,7 +124,14 @@ jobs:
         run: |
            export run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
            echo "run_id=$run_id" >> $GITHUB_ENV
-           
+
+      - name: Wait for job to finish
+        run: |
+          until $(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group azml-aks-online-endpoint-rg  --workspace-name azml_aks_online_endpoint_wrkspce | jq -r .Jobstatus) == "Completed"; do
+            echo "Waiting for job to finish"
+            sleep 10
+          done
+
       - name: Register the model
         run: |
           az ml model create -n sklearn-iris-example -v 1 -p runs:/$run_id/model --type mlflow_model
@@ -141,7 +148,7 @@ jobs:
            az feature register --namespace "Microsoft.ContainerService" --name "GPUDedicatedVHDPreview"
            az provider register --namespace Microsoft.ContainerService
 
-      - name: Register and install the Azure ML CLI extension
+      - name: Register and install the Azure ML extension
         env:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
