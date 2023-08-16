@@ -96,10 +96,10 @@ jobs:
   #      run: kubectl create namespace azml-aks-online-endpoint-ns
         
         
-  #    - name: Install AZ ML CLI Extenstion 
-  #      run: |
-  #          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
-  #          az extension add -n ml -y
+      - name: Install AZ ML CLI Extenstion 
+        run: |
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
+            az extension add -n ml -y
 
       - name: Setup AZML workspace
         env:
