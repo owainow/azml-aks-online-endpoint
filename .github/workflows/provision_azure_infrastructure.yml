@@ -135,7 +135,7 @@ jobs:
           until [ "$jobstatus" = "Completed" ]; do
             echo "Waiting for job to finish"
             sleep 10
-            exportjobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+            export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
           done
 
       - name: Register the model
