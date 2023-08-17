@@ -80,7 +80,7 @@ jobs:
           --load-balancer-sku standard \
           --network-plugin azure \
           --vnet-subnet-id $SUBNET \
-         --dns-service-ip 10.2.0.10 \
+          --dns-service-ip 10.2.0.10 \
           --service-cidr 10.2.0.0/24 \
           --enable-managed-identity \
           --generate-ssh-keys \
