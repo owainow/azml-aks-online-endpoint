@@ -170,7 +170,7 @@ jobs:
          --cluster-name azml-aks-online-endpoint-cluster \
          --name gpumodel1 \
          --node-count 1 \
-         --node-vm-size Standard_NCASv3_T4  \
+         --node-vm-size standard_nc4as_t4_v3  \
          --labels gpu=yes costcenter=5000 model=model1 \
          --aks-custom-headers UseGPUDedicatedVHD=true \
          --enable-cluster-autoscaler \
@@ -186,7 +186,7 @@ jobs:
          --cluster-name azml-aks-online-endpoint-cluster \
          --name gpumodel2 \
          --node-count 1 \
-         --node-vm-size Standard_NCASv3_T4  \
+         --node-vm-size standard_nc4as_t4_v3  \
          --labels gpu=yes costcenter=6000 model=model2 \
          --aks-custom-headers UseGPUDedicatedVHD=true \
          --enable-cluster-autoscaler \
