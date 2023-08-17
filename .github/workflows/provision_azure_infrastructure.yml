@@ -161,37 +161,37 @@ jobs:
         run: |
            az k8s-extension create --name azml-aks-online --extension-type Microsoft.AzureML.Kubernetes --config enableTraining=True enableInference=True inferenceRouterServiceType=LoadBalancer allowInsecureConnections=True InferenceRouterHA=False --cluster-type managedClusters --cluster-name azml-aks-online-endpoint-cluster --resource-group $RESOURCE_GROUP --scope cluster
      
-      - name: Create GPU Nodepool for Model 1
-        env:
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-        run: |
-         az aks nodepool add \
-         --resource-group $RESOURCE_GROUP \
-         --cluster-name azml-aks-online-endpoint-cluster \
-         --name gpumodel1 \
-         --node-count 1 \
-         --node-vm-size standard_nc4as_t4_v3  \
-         --labels gpu=yes costcenter=5000 model=model1 \
-         --aks-custom-headers UseGPUDedicatedVHD=true \
-         --enable-cluster-autoscaler \
-         --min-count 1 \
-         --max-count 3
+#      - name: Create GPU Nodepool for Model 1
+#        env:
+#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+#        run: |
+#         az aks nodepool add \
+#         --resource-group $RESOURCE_GROUP \
+#         --cluster-name azml-aks-online-endpoint-cluster \
+#         --name gpumodel1 \
+#         --node-count 1 \
+#         --node-vm-size standard_nc4as_t4_v3  \
+#         --labels gpu=yes costcenter=5000 model=model1 \
+#         --aks-custom-headers UseGPUDedicatedVHD=true \
+#         --enable-cluster-autoscaler \
+#         --min-count 1 \
+#         --max-count 3
 
-      - name: Create GPU Nodepool for Model 2
-        env:
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-        run: |
-         az aks nodepool add \
-         --resource-group $RESOURCE_GROUP \
-         --cluster-name azml-aks-online-endpoint-cluster \
-         --name gpumodel2 \
-         --node-count 1 \
-         --node-vm-size standard_nc4as_t4_v3  \
-         --labels gpu=yes costcenter=6000 model=model2 \
-         --aks-custom-headers UseGPUDedicatedVHD=true \
-         --enable-cluster-autoscaler \
-         --min-count 1 \
-         --max-count 3
+#      - name: Create GPU Nodepool for Model 2
+#        env:
+#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+#        run: |
+#         az aks nodepool add \
+#         --resource-group $RESOURCE_GROUP \
+#         --cluster-name azml-aks-online-endpoint-cluster \
+#         --name gpumodel2 \
+#         --node-count 1 \
+#         --node-vm-size standard_nc4as_t4_v3  \
+#         --labels gpu=yes costcenter=6000 model=model2 \
+#         --aks-custom-headers UseGPUDedicatedVHD=true \
+#         --enable-cluster-autoscaler \
+#         --min-count 1 \
+#         --max-count 3
 
       - name: Attatch cluster to ML Workspace
         env:
