@@ -84,7 +84,7 @@ jobs:
           --service-cidr 10.2.0.0/24 \
           --enable-managed-identity \
           --generate-ssh-keys \
-          --api-server-authorized-ip-ranges $runner_ip
+          --api-server-authorized-ip-ranges $runner_ip \
           --node-vm-size standard_DS3_v2
 
       - name: Get KubeConfig
