@@ -39,14 +39,6 @@ jobs:
              unzip odFridgeObject.zip
              pwd
              ls
-    
-      - name: Create JSONL file from downloaded data
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          WORKSPACE: azml_aks_online_endpoint_ws
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: python ./azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./data
 
         
       - name: Generate runner url from secret
@@ -149,6 +141,15 @@ jobs:
       - name: Clone model training repository
         run: |
             git clone --depth 1 https://github.com/Azure/azureml-examples
+
+      - name: Create JSONL file from downloaded data
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
+        run: python ./azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./data
+
      
       - name: Create training managed compute
         run: |
