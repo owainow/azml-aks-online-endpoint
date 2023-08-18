@@ -35,6 +35,8 @@ jobs:
       - name: Install Python dependencies
         run: |
           pip install azure-functions
+          pip install azure-identity
+          pip install azure-ai-ml
       #- name: Download data set for AZML Model 2
       #  working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
       #  run: |
