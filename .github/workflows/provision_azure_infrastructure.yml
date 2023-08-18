@@ -32,6 +32,9 @@ jobs:
       - name: Install required packages.
         run: sudo apt-get update && sudo apt-get install unzip -y && sudo apt-get install vim -y && sudo apt-get install python3 -y &&  sudo apt-get install jq -y && sudo apt-get install -y gettext-base && sudo apt-get install npm -y && curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && sudo az aks install-cli | sudo bash
       
+      - name: Install Python dependencies
+        run: |
+          pip install azure-functions
       #- name: Download data set for AZML Model 2
       #  working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
       #  run: |
