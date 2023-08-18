@@ -126,6 +126,9 @@ jobs:
 
       - name: Create JSONL file from downloaded data
         env: 
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secret.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secret.AZURE_CLIENT_SECRET }}
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
