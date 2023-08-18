@@ -110,6 +110,28 @@ jobs:
             curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
             az extension add -n ml -y
 
+      - name: Setup AZML workspace
+        env:
+          WORKSPACE: azml_aks_online_endpoint_ws
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          LOCATION: eastus 
+        run: |
+            az ml workspace create -n $WORKSPACE -g $RESOURCE_GROUP -l $LOCATION
+            az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
+
+      - name: Clone model training repository
+        run: |
+            git clone --depth 1 https://github.com/Azure/azureml-examples
+            
+
+      - name: Create JSONL file from downloaded data
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
+        run: python jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
+
       - name: Upload images to default AZML blob storage
         env: 
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
@@ -125,28 +147,6 @@ jobs:
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
         run: az ml data create -f uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
-
-
-      - name: Setup AZML workspace
-        env:
-          WORKSPACE: azml_aks_online_endpoint_ws
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          LOCATION: eastus 
-        run: |
-            az ml workspace create -n $WORKSPACE -g $RESOURCE_GROUP -l $LOCATION
-            az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
-
-      - name: Clone model training repository
-        run: |
-            git clone --depth 1 https://github.com/Azure/azureml-examples
-
-      - name: Create JSONL file from downloaded data
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          WORKSPACE: azml_aks_online_endpoint_ws
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
-        run: python jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
 
      
       - name: Create training managed compute
