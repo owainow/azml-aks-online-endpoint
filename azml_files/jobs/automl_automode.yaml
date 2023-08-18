@@ -1,3 +1,23 @@
+$schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
+type: automl
+
+experiment_name: dpv2-cli-automl-classifier-experiment
+# name: dpv2-cli-classifier-train-job-basic-01
+description: A Classification job using bank marketing
+
+compute: azureml:cpu-cluster
+
+task: classification
+primary_metric: accuracy
+
+target_column_name: "y"
+training_data:
+  path: "./training-mltable-folder"
+  type: mltable
+
 limits:
   max_trials: 10
   max_concurrent_trials: 2
+  
+featurization:
+  mode: auto
