@@ -206,7 +206,7 @@ jobs:
           ENDPOINT_NAME: azml-aks-online-endpoint
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
         run: |
-          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f endpoints/online/managed/sample/endpoint.yml
-          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f endpoints/online/managed/sample/blue-deployment.yml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f azml_files/endpoint/endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f azml_files/endpoint/kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
