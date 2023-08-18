@@ -1,23 +1,31 @@
 $schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
 type: automl
 
-experiment_name: dpv2-cli-automl-classifier-experiment
-# name: dpv2-cli-classifier-train-job-basic-01
-description: A Classification job using bank marketing
+# <experiment_name>
+experiment_name: dpv2-cli-automl-image-object-detection-experiment
+# </experiment_name>
+description: An Image Object Detection job using fridge items dataset
 
-compute: azureml:cpu-cluster
+# <task_settings>
+task: image_object_detection
+log_verbosity: debug
+primary_metric: mean_average_precision
+# </task_settings>
 
-task: classification
-primary_metric: accuracy
-
-target_column_name: "y"
+# <mltable_settings>
+target_column_name: label
 training_data:
-  path: "./training-mltable-folder"
+  # Update the path, if prepare_data.py is using data_path other than "./data"
+  path: data/training-mltable-folder
   type: mltable
+validation_data:
+  # Update the path, if prepare_data.py is using data_path other than "./data"
+  path: data/validation-mltable-folder
+  type: mltable
+# </mltable_settings>
 
+# <limit_settings>
 limits:
   max_trials: 10
   max_concurrent_trials: 2
-  
-featurization:
-  mode: auto
+# </limit_settings>
