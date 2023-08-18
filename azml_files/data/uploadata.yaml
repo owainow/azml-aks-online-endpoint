@@ -1,5 +1,5 @@
 $schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
 name: fridge-items-images-object-detection
 description: Fridge-items images Object detection
-path: ./odFridgeObjects
+path: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/odFridgeObjects
 type: uri_folder

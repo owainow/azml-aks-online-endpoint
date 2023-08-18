@@ -37,8 +37,6 @@ jobs:
         run: |
              wget https://cvbp-secondary.z19.web.core.windows.net/datasets/object_detection/odFridgeObjects.zip
              unzip odFridgeObjects.zip
-             pwd
-             ls
 
         
       - name: Generate runner url from secret
@@ -64,38 +62,38 @@ jobs:
         run: |
             az group create --name $RESOURCE_GROUP --location eastus
       
-      - name: Create VNET and Subnet
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-        run: |
-        
-          az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
-          az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
-          az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
+ #     - name: Create VNET and Subnet
+ #       env: 
+ #         RESOURCE_GROUP: azml-aks-online-endpoint-rg
+ #       run: |
+ #       
+ #         az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
+ #         az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
+ #         az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
 
       - name: Get runner IP address
         run: |
             export runner_ip="$(curl -s https://api.ipify.org)"
             echo "runner_ip=$runner_ip" >> $GITHUB_ENV
 
-      - name: Create AKS Cluster
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        run: |
-         SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
-         az aks create \
-          --resource-group $RESOURCE_GROUP \
-          --name azml-aks-online-endpoint-cluster \
-          --load-balancer-sku standard \
-          --network-plugin azure \
-          --vnet-subnet-id $SUBNET \
-          --dns-service-ip 10.2.0.10 \
-          --service-cidr 10.2.0.0/24 \
-          --enable-managed-identity \
-          --generate-ssh-keys \
-          --api-server-authorized-ip-ranges $runner_ip \
-          --node-vm-size standard_DS3_v2
+#      - name: Create AKS Cluster
+#        env: 
+#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+#          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+#        run: |
+#         SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
+#         az aks create \
+#          --resource-group $RESOURCE_GROUP \
+#          --name azml-aks-online-endpoint-cluster \
+#          --load-balancer-sku standard \
+#          --network-plugin azure \
+#          --vnet-subnet-id $SUBNET \
+#          --dns-service-ip 10.2.0.10 \
+#          --service-cidr 10.2.0.0/24 \
+#          --enable-managed-identity \
+#          --generate-ssh-keys \
+#          --api-server-authorized-ip-ranges $runner_ip \
+#          --node-vm-size standard_DS3_v2
 
       - name: Get KubeConfig
         env: 
@@ -103,8 +101,8 @@ jobs:
         run: az aks get-credentials -g $RESOURCE_GROUP  -n azml-aks-online-endpoint-cluster --overwrite-existing --admin
 
 
-      - name: Create AZML K8s namespace
-        run: kubectl create namespace azml-aks-online-endpoint-ns
+ #     - name: Create AZML K8s namespace
+ #       run: kubectl create namespace azml-aks-online-endpoint-ns
         
         
       - name: Install AZ ML CLI Extenstion 
@@ -118,7 +116,7 @@ jobs:
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: az ml data create -f ./azml_files/data/uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+        run: az ml data create -f azml_files/data/uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
 
       - name: Create ML Table as a data object
         env: 
@@ -126,7 +124,7 @@ jobs:
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: az ml data create -f ./azml_files/data/uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+        run: az ml data create -f azml_files/data/uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
 
 
       - name: Setup AZML workspace
@@ -148,7 +146,7 @@ jobs:
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: python ./azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./data
+        run: python azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
 
      
       - name: Create training managed compute
