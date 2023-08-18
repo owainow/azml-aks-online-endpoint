@@ -41,6 +41,7 @@ jobs:
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
         run: python -i ./azml_files/data/jsontojsonl.py
 
+        
       - name: Generate runner url from secret
         run: |
             export gh_runner_url="https://api.github.com/repos/${{ github.repository }}/actions/runners/registration-token"
@@ -69,33 +70,33 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
         
-       #   az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
-       #   az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
-       #   az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
+          az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
+          az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
+          az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
 
       - name: Get runner IP address
         run: |
             export runner_ip="$(curl -s https://api.ipify.org)"
             echo "runner_ip=$runner_ip" >> $GITHUB_ENV
 
- #     - name: Create AKS Cluster
- #       env: 
- #         RESOURCE_GROUP: azml-aks-online-endpoint-rg
- #         SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
- #       run: |
- #        SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
- #        az aks create \
- #         --resource-group $RESOURCE_GROUP \
- #         --name azml-aks-online-endpoint-cluster \
- #         --load-balancer-sku standard \
- #         --network-plugin azure \
- #         --vnet-subnet-id $SUBNET \
- #         --dns-service-ip 10.2.0.10 \
- #         --service-cidr 10.2.0.0/24 \
- #         --enable-managed-identity \
- #         --generate-ssh-keys \
- #         --api-server-authorized-ip-ranges $runner_ip \
- #         --node-vm-size standard_DS3_v2
+      - name: Create AKS Cluster
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        run: |
+         SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
+         az aks create \
+          --resource-group $RESOURCE_GROUP \
+          --name azml-aks-online-endpoint-cluster \
+          --load-balancer-sku standard \
+          --network-plugin azure \
+          --vnet-subnet-id $SUBNET \
+          --dns-service-ip 10.2.0.10 \
+          --service-cidr 10.2.0.0/24 \
+          --enable-managed-identity \
+          --generate-ssh-keys \
+          --api-server-authorized-ip-ranges $runner_ip \
+          --node-vm-size standard_DS3_v2
 
       - name: Get KubeConfig
         env: 
@@ -103,8 +104,8 @@ jobs:
         run: az aks get-credentials -g $RESOURCE_GROUP  -n azml-aks-online-endpoint-cluster --overwrite-existing --admin
 
 
- #     - name: Create AZML K8s namespace
- #       run: kubectl create namespace azml-aks-online-endpoint-ns
+      - name: Create AZML K8s namespace
+        run: kubectl create namespace azml-aks-online-endpoint-ns
         
         
       - name: Install AZ ML CLI Extenstion 
@@ -112,46 +113,94 @@ jobs:
             curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash 
             az extension add -n ml -y
 
-  #    - name: Setup AZML workspace
-  #      env:
-  #        WORKSPACE: azml_aks_online_endpoint_ws
-  #        RESOURCE_GROUP: azml-aks-online-endpoint-rg
-  #        LOCATION: eastus 
-  #      run: |
-  #          az ml workspace create -n $WORKSPACE -g $RESOURCE_GROUP -l $LOCATION
-  #          az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
+      - name: Upload images to default AZML blob storage
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
+        run: az ml data create -f ./azml_files/data/uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+
+      - name: Create ML Table as a data object
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
+        run: az ml data create -f ./azml_files/data/uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+
+
+      - name: Setup AZML workspace
+        env:
+          WORKSPACE: azml_aks_online_endpoint_ws
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          LOCATION: eastus 
+        run: |
+            az ml workspace create -n $WORKSPACE -g $RESOURCE_GROUP -l $LOCATION
+            az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
 
       - name: Clone model training repository
         run: |
             git clone --depth 1 https://github.com/Azure/azureml-examples
      
-   #   - name: Create training managed compute
-   #     run: |
-   #         az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
+      - name: Create training managed compute
+        run: |
+            az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
     
       
-   #   - name: Train example model
-   #     working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
-   #     run: |
-   #        export run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
-   #        echo "run_id=$run_id" >> $GITHUB_ENV
+      - name: Train example model 1
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
+        run: |
+           export run_id=$(az ml job create -f jobs/single-step/scikit-learn/iris/job.yml --query name -o tsv)
+           echo "run_id=$run_id" >> $GITHUB_ENV
 
-   #   - name: Wait for job to finish
-   #     env:
-   #       WORKSPACE: azml_aks_online_endpoint_ws
-   #       RESOURCE_GROUP: azml-aks-online-endpoint-rg
-   #     run: |
-   #       export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
-   #       until [ "$jobstatus" = "Completed" ]; do
-   #         echo "Waiting for job to finish"
-   #         sleep 10
-   #         export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
-   #       done
+      - name: Wait for model 1 job to finish
+        env:
+          WORKSPACE: azml_aks_online_endpoint_ws
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+          until [ "$jobstatus" = "Completed" ]; do
+            echo "Waiting for job to finish"
+            sleep 10
+            export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+          done
 
-   #   - name: Register the model
-   #     run: |
-   #       az ml model create -n sklearn-iris-example -v 1 -p runs:/$run_id/model --type mlflow_model
-   #   
+      - name: Register model 1
+        run: |
+          az ml model create -n sklearn-iris-example -v 1 -p runs:/$run_id/model --type mlflow_model
+
+      - name: Train model 2
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
+        run: |
+            export run_id=$(az ml job create --file ./hello-automl-job-basic.yml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID)
+            echo "run_id=$run_id" >> $GITHUB_ENV
+
+      - name: Wait for model 2 job to finish
+        env:
+          WORKSPACE: azml_aks_online_endpoint_ws
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+          until [ "$jobstatus" = "Completed" ]; do
+            echo "Waiting for job to finish"
+            sleep 10
+            export jobstatus=$(az ml job show --name $run_id --query "{Jobstatus:status}"  --output json --resource-group $RESOURCE_GROUP  --workspace-name $WORKSPACE | jq -r .Jobstatus )
+          done
+
+      - name: Register model 2
+        env:
+          WORKSPACE: azml_aks_online_endpoint_ws
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        run: |
+          az ml model create -n fridge-items-mlflow-model -v 1 -p runs:/$run_id/mlflow-model --type mlflow_model --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --subscription $SUBSCRIPTION_ID
+
+
       - name: Add preview extension
         run: |
           az extension add --name aks-preview
@@ -170,37 +219,37 @@ jobs:
         run: |
            az k8s-extension create --name azml-aks-online --extension-type Microsoft.AzureML.Kubernetes --config enableTraining=True enableInference=True inferenceRouterServiceType=LoadBalancer allowInsecureConnections=True InferenceRouterHA=False --cluster-type managedClusters --cluster-name azml-aks-online-endpoint-cluster --resource-group $RESOURCE_GROUP --scope cluster
      
-#      - name: Create GPU Nodepool for Model 1
-#        env:
-#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-#        run: |
-#         az aks nodepool add \
-#         --resource-group $RESOURCE_GROUP \
-#         --cluster-name azml-aks-online-endpoint-cluster \
-#         --name gpumodel1 \
-#         --node-count 1 \
-#         --node-vm-size standard_nc4as_t4_v3  \
-#         --labels gpu=yes costcenter=5000 model=model1 \
-#         --aks-custom-headers UseGPUDedicatedVHD=true \
-#         --enable-cluster-autoscaler \
-#         --min-count 1 \
-#         --max-count 3
+      - name: Create GPU Nodepool for Model 1
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+         az aks nodepool add \
+         --resource-group $RESOURCE_GROUP \
+         --cluster-name azml-aks-online-endpoint-cluster \
+         --name gpumodel1 \
+         --node-count 1 \
+         --node-vm-size standard_nc4as_t4_v3  \
+         --labels gpu=yes costcenter=5000 model=model1 \
+         --aks-custom-headers UseGPUDedicatedVHD=true \
+         --enable-cluster-autoscaler \
+         --min-count 1 \
+         --max-count 3
 
-#      - name: Create GPU Nodepool for Model 2
-#        env:
-#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-#        run: |
-#         az aks nodepool add \
-#         --resource-group $RESOURCE_GROUP \
-#         --cluster-name azml-aks-online-endpoint-cluster \
-#         --name gpumodel2 \
-#         --node-count 1 \
-#         --node-vm-size standard_nc4as_t4_v3  \
-#         --labels gpu=yes costcenter=6000 model=model2 \
-#         --aks-custom-headers UseGPUDedicatedVHD=true \
-#         --enable-cluster-autoscaler \
-#         --min-count 1 \
-#         --max-count 3
+      - name: Create GPU Nodepool for Model 2
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+         az aks nodepool add \
+         --resource-group $RESOURCE_GROUP \
+         --cluster-name azml-aks-online-endpoint-cluster \
+         --name gpumodel2 \
+         --node-count 1 \
+         --node-vm-size standard_nc4as_t4_v3  \
+         --labels gpu=yes costcenter=6000 model=model2 \
+         --aks-custom-headers UseGPUDedicatedVHD=true \
+         --enable-cluster-autoscaler \
+         --min-count 1 \
+         --max-count 3
 
       - name: Attatch cluster to ML Workspace
         env:
@@ -217,5 +266,5 @@ jobs:
           WORKSPACE: azml_aks_online_endpoint_ws
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
         run: |
-          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f azml_files/endpoint/endpoint_config.yaml
-          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f azml_files/endpoint/kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f azml_files/endpoint/model1_endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f azml_files/endpoint/model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE

@@ -1,0 +1,28 @@
+$schema: https://azuremlschemas.azureedge.net/latest/kubernetesOnlineDeployment.schema.json
+name: blue
+type: kubernetes
+endpoint_name: my-endpoint
+model:
+  path: ../model-1/model/
+code_configuration:
+  code: ../model-1/onlinescoring/
+  scoring_script: score.py
+instance_type: gpumodel2
+environment: 
+  conda_file: ../model-1/environment/conda.yaml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.3-cudnn8-ubuntu20.04:latest
+request_settings:
+  request_timeout_ms: 3000
+  max_queue_wait_ms: 3000
+resources:
+  requests:
+    cpu: "0.1"
+    memory: "0.1Gi"
+  limits:
+    cpu: "0.2"
+    memory: "200Mi"
+tags:
+  tag1: deployment-tag1-value
+instance_count: 1
+scale_settings:
+  type: default

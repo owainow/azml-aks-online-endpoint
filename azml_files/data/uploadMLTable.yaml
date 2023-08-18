@@ -1,0 +1,7 @@
+target_column_name: label
+training_data:
+  path: data/training-mltable-folder
+  type: mltable
+validation_data:
+  path: data/validation-mltable-folder
+  type: mltable
