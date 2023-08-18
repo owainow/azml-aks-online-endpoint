@@ -34,7 +34,8 @@ jobs:
       
       - name: Download data set for AZML Model 2
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: wget https://cvbp-secondary.z19.web.core.windows.net/datasets/object_detection/odFridgeObjects.zip
+        run: |
+             wget https://cvbp-secondary.z19.web.core.windows.net/datasets/object_detection/odFridgeObjects.zip
              unzip odFridgeObject.zip
              pwd
              ls
