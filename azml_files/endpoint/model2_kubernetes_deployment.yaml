@@ -1,12 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/kubernetesOnlineDeployment.schema.json
 name: blue
 type: kubernetes
-endpoint_name: my-endpoint
-model:
-  path: ../model-1/model/
-code_configuration:
-  code: ../model-1/onlinescoring/
-  scoring_script: score.py
+endpoint_name: od-fridge-items-endpoint
+model: azureml:od-fridge-items-mlflow-model@latest
 instance_type: gpumodel2
 environment: 
   conda_file: ../model-1/environment/conda.yaml

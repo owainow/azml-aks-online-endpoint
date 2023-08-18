@@ -36,10 +36,16 @@ jobs:
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
         run: wget https://cvbp-secondary.z19.web.core.windows.net/datasets/object_detection/odFridgeObjects.zip
              unzip odFridgeObject.zip
+             pwd
+             ls
     
       - name: Create JSONL file from downloaded data
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: python -i ./azml_files/data/jsontojsonl.py
+        run: python ./azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./data
 
         
       - name: Generate runner url from secret
