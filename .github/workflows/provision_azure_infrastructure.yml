@@ -115,16 +115,16 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: az ml data create -f azml_files/data/uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
+        run: az ml data create -f uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
 
       - name: Create ML Table as a data object
         env: 
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: az ml data create -f azml_files/data/uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
+        run: az ml data create -f uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
 
 
       - name: Setup AZML workspace
@@ -145,8 +145,8 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
-        run: python azml_files/data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
+        run: python jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
 
      
       - name: Create training managed compute
@@ -270,7 +270,7 @@ jobs:
           ENDPOINT_NAME: azml-aks-online-endpoint
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
         run: |
-          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f azml_files/endpoint/model1_endpoint_config.yaml
-          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f azml_files/endpoint/model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f model1_endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
