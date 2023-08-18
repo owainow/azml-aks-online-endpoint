@@ -1,0 +1,32 @@
+apiVersion: amlarc.azureml.com/v1alpha1
+kind: InstanceTypeList
+items:
+  - metadata:
+      name: gpumodel1
+    spec:
+      nodeSelector:
+       ostcenter: "5000"
+       model: "model1"
+      resources:
+        requests:
+          cpu: "1"
+          memory: "1Gi"
+        limits:
+          cpu: "1"
+          nvidia.com/gpu: 1
+          memory: "1Gi"
+
+  - metadata:
+      name: gpumodel2
+    spec:
+      nodeSelector:
+       costcenter: "6000"
+       model: "model2"
+      resources:
+        requests:
+          cpu: "1"
+          memory: "1Gi" 
+        limits:
+          cpu: "1"
+          nvidia.com/gpu: 1
+          memory: "1Gi"
