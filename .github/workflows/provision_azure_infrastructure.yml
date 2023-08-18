@@ -153,22 +153,6 @@ jobs:
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
         run: python jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
 
-      - name: Upload images to default AZML blob storage
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          WORKSPACE: azml_aks_online_endpoint_ws
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
-        run: az ml data create -f uploaddata.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
-
-      - name: Create ML Table as a data object
-        env: 
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          WORKSPACE: azml_aks_online_endpoint_ws
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/data/
-        run: az ml data create -f uploadMLTable.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
-
      
       - name: Create training managed compute
         run: |
