@@ -56,18 +56,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-      - name: Create Service Principal & Set ENV Vars
-        env:
-          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        run: |
-          az ad sp create-for-rbac --name azml-data-upload-sp --role contributor --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP >> tmp.txt
-          export AZURE_CLIENT_SECRET="$(cat tmp.txt | jq -r .password)"
-          export AZURE_CLIENT_ID="$(cat tmp.txt | jq -r .appId)"
-          export AZURE_TENANT_ID="$(cat tmp.txt | jq -r .tenant)"
-          echo "AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET" >> $GITHUB_ENV
-          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_ENV
-          echo "AZURE_TENANT_ID=$AZURE_TENANT_ID" >> $GITHUB_ENV
+#      - name: Create Service Principal & Set ENV Vars
+#        env:
+#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+#          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+#        run: |
+#          az ad sp create-for-rbac --name azml-data-upload-sp --role contributor --scopes /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP >> tmp.txt
+#          export AZURE_CLIENT_SECRET="$(cat tmp.txt | jq -r .password)"
+#          export AZURE_CLIENT_ID="$(cat tmp.txt | jq -r .appId)"
+#          export AZURE_TENANT_ID="$(cat tmp.txt | jq -r .tenant)"
+#          echo "AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET" >> $GITHUB_ENV
+#          echo "AZURE_CLIENT_ID=$AZURE_CLIENT_ID" >> $GITHUB_ENV
+#          echo "AZURE_TENANT_ID=$AZURE_TENANT_ID" >> $GITHUB_ENV
 
       - name: Create Resource Group
         env: 
@@ -139,6 +139,9 @@ jobs:
 
       - name: Create JSONL file from downloaded data
         env: 
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
