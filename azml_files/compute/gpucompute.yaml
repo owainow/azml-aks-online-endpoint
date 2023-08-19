@@ -1,5 +1,4 @@
 $schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json 
 name: gpu-instance
 type: computeinstance
-location: eastus
 size: standard_nc4as_t4_v3
