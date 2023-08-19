@@ -23,7 +23,7 @@ validation_data:
   path: ./odFridgeObjects/validation-mltable-folder
   type: mltable
 # </mltable_settings>
-
+compute: azureml:cpu-cluster
 # <limit_settings>
 limits:
   max_trials: 10

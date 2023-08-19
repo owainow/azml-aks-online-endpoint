@@ -153,13 +153,6 @@ jobs:
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/
         run: |
           python ./data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
-          pwd
-          ls 
-          cd odFridgeObjects
-          ls
-          cd ..
-          cd data
-          ls
 
      
       - name: Create training managed compute
