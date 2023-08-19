@@ -155,11 +155,11 @@ jobs:
           python ./data/jsontojsonl.py --subscription $SUBSCRIPTION_ID --group $RESOURCE_GROUP --workspace $WORKSPACE --data_path ./odFridgeObjects
 
      
-      - name: Create training managed compute
+      - name: Create training managed compute - CPU Cluster
         run: |
             az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
     
-      - name: Create training managed compute
+      - name: Create training managed compute - GPU Instance
         env:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
