@@ -1,4 +1,4 @@
 $schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json 
-name: gpu-instance
+name: gpu-instance-oow-azml # regionally unique
 type: computeinstance
 size: standard_nc4as_t4_v3
