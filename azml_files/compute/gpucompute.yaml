@@ -1,4 +1,8 @@
 $schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json 
-name: gpu-instance-oow-azml # regionally unique
-type: computeinstance
+name: gpu-compute
+type: amlcompute
 size: standard_nc4as_t4_v3
+min_instances: 0
+max_instances: 1
+idle_time_before_scale_down: 120
+location: eastus
