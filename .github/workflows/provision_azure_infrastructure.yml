@@ -37,6 +37,7 @@ jobs:
           pip install azure-functions
           pip install azure-identity
           pip install azure-ai-ml
+
       #- name: Download data set for AZML Model 2
       #  working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
       #  run: |
@@ -79,39 +80,55 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
             az group create --name $RESOURCE_GROUP --location eastus
-      
- #     - name: Create VNET and Subnet
- #       env: 
- #         RESOURCE_GROUP: azml-aks-online-endpoint-rg
- #       run: |
- #       
- #         az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
- #         az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
- #         az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
+
+      - name: Register Microsoft Event Grid
+        run: |
+          az provider register --namespace Microsoft.EventGrid
+
+      - name: Create infrerence storage account
+        env:
+          ENDPOINT_NAME: azml-aks-online-endpoint
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+        run: |
+            az storage account create \
+            --name inferenceupload \
+            --resource-group $RESOURCE_GROUP \
+            --location eastus 
+
+
+      - name: Create VNET and Subnet
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+        
+          az network vnet create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-vnet
+          az network nsg create --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-nsg
+          az network vnet subnet create  --resource-group $RESOURCE_GROUP --name azml-aks-online-endpoint-subnet --vnet-name azml-aks-online-endpoint-vnet  --address-prefixes 10.0.0.0/22 --network-security-group azml-aks-online-endpoint-nsg
 
       - name: Get runner IP address
         run: |
             export runner_ip="$(curl -s https://api.ipify.org)"
             echo "runner_ip=$runner_ip" >> $GITHUB_ENV
 
-#      - name: Create AKS Cluster
-#        env: 
-#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-#          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-#        run: |
-#         SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
-#         az aks create \
-#          --resource-group $RESOURCE_GROUP \
-#          --name azml-aks-online-endpoint-cluster \
-#          --load-balancer-sku standard \
-#          --network-plugin azure \
-#          --vnet-subnet-id $SUBNET \
-#          --dns-service-ip 10.2.0.10 \
-#          --service-cidr 10.2.0.0/24 \
-#          --enable-managed-identity \
-#          --generate-ssh-keys \
-#          --api-server-authorized-ip-ranges $runner_ip \
-#          --node-vm-size standard_DS3_v2
+      - name: Create AKS Cluster
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        run: |
+         SUBNET=$(az network vnet subnet list --resource-group $RESOURCE_GROUP --vnet-name azml-aks-online-endpoint-vnet --query "[?name=='azml-aks-online-endpoint-subnet'].id" --output tsv)
+         az aks create \
+          --resource-group $RESOURCE_GROUP \
+          --name azml-aks-online-endpoint-cluster \
+          --load-balancer-sku standard \
+          --network-plugin azure \
+          --vnet-subnet-id $SUBNET \
+          --dns-service-ip 10.2.0.10 \
+          --service-cidr 10.2.0.0/24 \
+          --enable-managed-identity \
+          --generate-ssh-keys \
+          --api-server-authorized-ip-ranges $runner_ip \
+          --node-vm-size standard_DS3_v2
 
       - name: Get KubeConfig
         env: 
@@ -119,9 +136,12 @@ jobs:
         run: az aks get-credentials -g $RESOURCE_GROUP  -n azml-aks-online-endpoint-cluster --overwrite-existing --admin
 
 
- #     - name: Create AZML K8s namespace
- #       run: kubectl create namespace azml-aks-online-endpoint-ns
-        
+      - name: Create AZML K8s namespace
+        run: kubectl create namespace azml-aks-online-endpoint-ns
+      
+      - name: Create AZML K8s instance types CRDS 
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/kubernetes_config
+        run: kubectl apply -f instance_types.yaml 
         
       - name: Install AZ ML CLI Extenstion 
         run: |
@@ -279,12 +299,131 @@ jobs:
         run: |
          az ml compute attach --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --type Kubernetes --name azml-aks-attatch --resource-id "/subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.ContainerService/managedclusters/azml-aks-online-endpoint-cluster" --identity-type SystemAssigned --namespace azml-aks-online-endpoint-ns --no-wait
       
-      - name: Create ML Endpoint with AKS backend
+      - name: Create ML Endpoint for model 1 with AKS backend
         env:
-          ENDPOINT_NAME: azml-aks-online-endpoint
+          ENDPOINT_NAME: azml-aks-online-endpoint-model1
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
         run: |
           az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f model1_endpoint_config.yaml
           az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+
+      - name: Create ML Endpoint for model 1 with AKS backend
+        env:
+          ENDPOINT_NAME: azml-aks-online-endpoint-model2
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
+        run: |
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f model2_endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f model2_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+       
+      - name: Create function storage account
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          export functionstorage="funcstorage$RANDOM"
+          echo "functionstorage=$functionstorage" >> $GITHUB_ENV
+          az storage account create --name $functionstorage --location useast --resource-group $RESOURCE_GROUP --sku Standard_LRS --kind StorageV2  --allow-blob-public-access true
+    
+      - name: Create Azure Function
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          az functionapp create --name azml-function-app-inference --storage-account $functionstorage --resource-group $RESOURCE_GROUP --consumption-plan-location useast
+      
+      - name: Configure function app storage
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          storageConnectionString=$(az storage account show-connection-string --resource-group $RESOURCE_GROUP --name inferenceupload  --query connectionString --output tsv)
+          az functionapp config appsettings set --name azml-function-app-inference --resource-group $RESOURCE_GROUP --settings AzureWebJobsStorage=$storageConnectionString THUMBNAIL_CONTAINER_NAME=thumbnails THUMBNAIL_WIDTH=100 FUNCTIONS_EXTENSION_VERSION=~2 FUNCTIONS_WORKER_RUNTIME=dotnet
+     
+      - name: Create the Service Bus
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          az servicebus namespace create --resource-group $RESOURCE_GROUP --name azmlaksonlineendpointbus --location eastus --mi-system-assigned
+          az servicebus queue create --resource-group $RESOURCE_GROUP --namespace-name azmlaksonlineendpointbus --name azmlaksonlineendpointbusq
+       
+      - name: Create storage for DLQ
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          storageAccountName: azmlaksonlinedlq 
+        run: |
+            az storage account create \
+             --name $storageAccountName \
+             --resource-group $RESOURCE_GROUP \
+            --query id \
+            --output tsv 1>/dev/null
+
+            echo "Retrieving the primary key of the [$storageAccountName] storage account..."
+            export storageAccountKey=$(az storage account keys list \
+             --account-name $storageAccountName \
+            --resource-group $resourceGroupName \
+            --query [0].value -o tsv)
+              az storage container create \
+             --name azmldlq \
+             --account-name $storageAccountName \
+              --account-key $storageAccountKey \
+            --query id \
+            --output tsv 1>/dev/null
+
+      - name: Create eventgrid subscription 
+        env: 
+         RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          export subjectEndsWith="${tenant,,}"
+          export storageAccountId=$(az storage account show \
+            --name $storageAccountName \
+            --resource-group $resourceGroupName \
+            --query id \
+            --output tsv 2>/dev/null)
+
+          export serviceBusId=$(az servicebus queue show \
+            --name $serviceBusQueueName \
+            --namespace-name azmlaksonlineendpointbus \
+           --resource-group $RESOURCE_GROUP \
+            --query id \
+            --output tsv)
+
+          az eventgrid event-subscription create \
+            --endpoint-type servicebusqueue \
+            --endpoint $serviceBusId \
+            --deadletter-endpoint ${storageAccountId}/blobServices/default/containers/azmldlq \
+            --name $eventGridSubscriptionName \
+            --subject-ends-with $subjectEndsWith \
+            --source-resource-id $resourceId 1>/dev/null
+
+      - name: Create system topic for Azure Storage account
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          storageid=$(az storage account show --name inferenceupload --resource-group $RESOURCE_GROUP --query id --output tsv) 
+          az eventgrid system-topic create \
+          -g $RESOURCE_GROUP \
+          --name inference-storage-topic\
+          --location useast \
+          --topic-type microsoft.storage.storageaccounts \
+          --source $storageid
+     
+     
+      - name: Create eventgrid subscription to push to queue 
+        env: 
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        run: |
+          az eventgrid event-subscription create --name azml-aks-online-es1 \
+          --system-topic-name  \
+          --endpoint /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Web/sites/azml-function-app-inference/functions/callmodel2 --endpoint-type azurefunction --functions-version 4
+
+      - name: Create COSMOS output table
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+        run: |
+          az cosmosdb database create --name azml-aks-online-endpoint-output-db --resource-group $RESOURCE_GROUP --db-name model2output
+      
+# Create function that is triggered by event hub or service bus
+# Create code for function that calls AZML API and uploads result to Cosmos DB
+# Create additional endpoint for model 2
