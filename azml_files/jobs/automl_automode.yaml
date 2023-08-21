@@ -27,5 +27,5 @@ compute: azureml:gpu-cluster
 # <limit_settings>
 limits:
   max_trials: 10
-  max_concurrent_trials: 2
+  max_concurrent_trials: 1
 # </limit_settings>
