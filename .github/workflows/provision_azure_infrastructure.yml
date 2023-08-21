@@ -139,9 +139,6 @@ jobs:
       - name: Create AZML K8s namespace
         run: kubectl create namespace azml-aks-online-endpoint-ns
       
-      - name: Create AZML K8s instance types CRDS 
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/kubernetes_config
-        run: kubectl apply -f instance_types.yaml 
         
       - name: Install AZ ML CLI Extenstion 
         run: |
@@ -258,6 +255,11 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
            az k8s-extension create --name azml-aks-online --extension-type Microsoft.AzureML.Kubernetes --config enableTraining=True enableInference=True inferenceRouterServiceType=LoadBalancer allowInsecureConnections=True InferenceRouterHA=False --cluster-type managedClusters --cluster-name azml-aks-online-endpoint-cluster --resource-group $RESOURCE_GROUP --scope cluster
+
+      
+      - name: Create AZML K8s instance types CRDS 
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/kubernetes_config
+        run: kubectl apply -f instance_types.yaml 
      
       - name: Create GPU Nodepool for Model 1
         env:
