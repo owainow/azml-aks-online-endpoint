@@ -426,4 +426,3 @@ jobs:
       
 # Create function that is triggered by event hub or service bus
 # Create code for function that calls AZML API and uploads result to Cosmos DB
-# Create additional endpoint for model 2
