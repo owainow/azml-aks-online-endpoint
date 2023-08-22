@@ -340,7 +340,7 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
         run: |
           storageConnectionString=$(az storage account show-connection-string --resource-group $RESOURCE_GROUP --name inferenceupload  --query connectionString --output tsv)
-          az functionapp config appsettings set --name azml-function-app-inference --resource-group $RESOURCE_GROUP --settings AzureWebJobsStorage=$storageConnectionString THUMBNAIL_CONTAINER_NAME=thumbnails THUMBNAIL_WIDTH=100 FUNCTIONS_EXTENSION_VERSION=~2 FUNCTIONS_WORKER_RUNTIME=dotnet
+          az functionapp config appsettings set --name azml-function-app-inference --resource-group $RESOURCE_GROUP --settings AzureWebJobsStorage=$storageConnectionString FUNCTIONS_EXTENSION_VERSION=~2 FUNCTIONS_WORKER_RUNTIME=dotnet
      
       - name: Create the Service Bus
         env: 
