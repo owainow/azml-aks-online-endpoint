@@ -1,11 +1,11 @@
 $schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
 type: automl
-compute: azureml:gpu-cluster
 # <experiment_name>
 experiment_name: dpv2-cli-automl-image-object-detection-experiment
 # </experiment_name>
 description: An Image Object Detection job using fridge items dataset
-
+settings:
+  default_compute: azureml:gpu-cluster
 # <task_settings>
 task: image_object_detection
 log_verbosity: debug
