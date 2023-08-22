@@ -1,6 +1,6 @@
 $schema: https://azuremlsdk2.blob.core.windows.net/preview/0.0.1/autoMLJob.schema.json
 type: automl
-
+compute: azureml:gpu-cluster
 # <experiment_name>
 experiment_name: dpv2-cli-automl-image-object-detection-experiment
 # </experiment_name>
@@ -23,7 +23,7 @@ validation_data:
   path: ./odFridgeObjects/validation-mltable-folder
   type: mltable
 # </mltable_settings>
-compute: azureml:gpu-cluster
+
 # <limit_settings>
 limits:
   max_trials: 10

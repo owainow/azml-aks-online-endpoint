@@ -418,7 +418,7 @@ jobs:
         run: |
           az eventgrid event-subscription create --name azml-aks-online-es1 \
           --system-topic-name  \
-          --endpoint /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Web/sites/azml-function-app-inference/functions/callmodel2 --endpoint-type azurefunction --functions-version 4
+          --endpoint /subscriptions/$SUBSCRIPTION_ID/resourceGroups/$RESOURCE_GROUP/providers/namespaces/azmlaksonlineendpointbus/
 
       - name: Create COSMOS output table
         env:
