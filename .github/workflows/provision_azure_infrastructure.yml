@@ -176,14 +176,14 @@ jobs:
 #        run: |
 #            az ml compute create -n cpu-cluster --type amlcompute --min-instances 0 --max-instances 4
     
-#      - name: Create training managed compute - GPU Instance
-#        env:
-#          RESOURCE_GROUP: azml-aks-online-endpoint-rg
-#          WORKSPACE: azml_aks_online_endpoint_ws
-#          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-#        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/compute
-#        run: |
-#            az ml compute create -f gpucompute.yaml  --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
+      - name: Create training managed compute - GPU Instance
+        env:
+          RESOURCE_GROUP: azml-aks-online-endpoint-rg
+          WORKSPACE: azml_aks_online_endpoint_ws
+          SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/compute
+        run: |
+            az ml compute create -f gpucompute.yaml  --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID
     
       - name: Train example model 1
         working-directory: /home/runner/work/azml-aks-online-endpoint/azureml-examples/cli/
