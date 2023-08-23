@@ -235,7 +235,7 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
         run: |
-          az ml model create -n fridge-items-mlflow-model -v 1 -p runs:/"$run_id_2"_HD_5/outputs/mlflow-model --type mlflow_model --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --subscription $SUBSCRIPTION_ID
+          az ml model create -n fridge-items-mlflow-model -v 1 -p runs:/"$run_id_2"_HD_4/outputs/mlflow-model --type mlflow_model --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --subscription $SUBSCRIPTION_ID
 
 
       - name: Add preview extension
