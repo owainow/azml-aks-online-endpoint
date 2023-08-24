@@ -307,23 +307,21 @@ jobs:
       
       - name: Create ML Endpoint for model 1 with AKS backend
         env:
-          ENDPOINT_NAME: azml-aks-online-endpoint-model1
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
         run: |
-          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f model1_endpoint_config.yaml
-          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name azml-aks-online-endpoint-model1 -f model1_endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint $azml-aks-online-endpoint-model1 -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
 
-      - name: Create ML Endpoint for model 1 with AKS backend
+      - name: Create ML Endpoint for model 2 with AKS backend
         env:
-          ENDPOINT_NAME: azml-aks-online-endpoint-model2
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
         run: |
-          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name $ENDPOINT_NAME -f model2_endpoint_config.yaml
-          az ml online-deployment create --name blue --endpoint $ENDPOINT_NAME -f model2_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name azml-aks-online-endpoint-model2 -f model2_endpoint_config.yaml
+          az ml online-deployment create --name blue --endpoint azml-aks-online-endpoint-model2 -f model2_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
        
       - name: Create function storage account
         env:
