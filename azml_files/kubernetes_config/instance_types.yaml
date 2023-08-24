@@ -5,7 +5,7 @@ items:
       name: gpumodel1
     spec:
       nodeSelector:
-       ostcenter: "5000"
+       costcenter: "5000"
        model: "model1"
       resources:
         requests:
