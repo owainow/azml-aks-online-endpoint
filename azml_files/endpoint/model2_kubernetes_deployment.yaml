@@ -1,17 +1,12 @@
 name: od-fridge-items-mlflow-deploy
 endpoint_name: od-fridge-items-endpoint
+type: kubernetes
 model: azureml:fridge-items-mlflow-model@latest
 instance_type: gpumodel2
-instance_count: 1
-liveness_probe:
-    failure_threshold: 30
-    success_threshold: 1
-    timeout: 2
-    period: 10
-    initial_delay: 2000
-readiness_probe:
-    failure_threshold: 10
-    success_threshold: 1
-    timeout: 10
-    period: 10
-    initial_delay: 2000 
+resources:
+  requests:
+    cpu: "0.1"
+    memory: "0.1Gi"
+  limits:
+    cpu: "0.2"
+    memory: "200Mi"
