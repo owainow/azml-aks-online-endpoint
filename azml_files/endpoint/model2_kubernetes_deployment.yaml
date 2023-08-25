@@ -1,8 +1,15 @@
-name: od-fridge-items-mlflow-deploy
-endpoint_name: od-fridge-items-endpoint
+$schema: https://azuremlschemas.azureedge.net/latest/kubernetesOnlineDeployment.schema.json
+name: blue
 type: kubernetes
+endpoint_name: od-fridge-items-endpoint
 model: azureml:fridge-items-mlflow-model@latest
 instance_type: gpumodel2
+environment: 
+  conda_file: ../model-1/environment/conda.yaml
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.0.3-cudnn8-ubuntu18.04:latest
+request_settings:
+  request_timeout_ms: 3000
+  max_queue_wait_ms: 3000
 resources:
   requests:
     cpu: "0.1"
@@ -10,3 +17,8 @@ resources:
   limits:
     cpu: "0.2"
     memory: "200Mi"
+tags:
+  tag1: deployment-tag1-value
+instance_count: 1
+scale_settings:
+  type: default
