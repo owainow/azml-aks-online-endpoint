@@ -159,6 +159,7 @@ jobs:
             az configure --defaults group=$RESOURCE_GROUP workspace=$WORKSPACE location=$LOCATION
 
       - name: Clone model training repository
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/
         run: |
             git clone --depth 1 https://github.com/Azure/azureml-examples
             

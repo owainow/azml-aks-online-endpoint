@@ -3,13 +3,13 @@ name: blue
 type: kubernetes
 endpoint_name: my-endpoint
 model:
-  path: ../model-1/model/
+  path: ../../model-1/model/
 code_configuration:
-  code: ../model-1/onlinescoring/
+  code: ../../model-1/onlinescoring/
   scoring_script: score.py
 instance_type: gpumodel1
 environment: 
-  conda_file: ../model-1/environment/conda.yaml
+  conda_file: ../../model-1/environment/conda.yaml
   image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.3-cudnn8-ubuntu20.04:latest
 request_settings:
   request_timeout_ms: 3000
