@@ -316,7 +316,7 @@ jobs:
         working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/endpoint/
         run: |
           az ml online-endpoint create --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE --name azml-aks-online-endpoint-model1 -f model1_endpoint_config.yaml
-          az ml online-deployment create --name blue --endpoint $azml-aks-online-endpoint-model1 -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
+          az ml online-deployment create --name blue --endpoint azml-aks-online-endpoint-model1 -f model1_kubernetes_deployment.yaml --all-traffic --resource-group $RESOURCE_GROUP --workspace-name $WORKSPACE
 
       - name: Create ML Endpoint for model 2 with AKS backend
         env:
