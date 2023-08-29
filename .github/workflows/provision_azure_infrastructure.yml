@@ -217,7 +217,7 @@ jobs:
           RESOURCE_GROUP: azml-aks-online-endpoint-rg
           WORKSPACE: azml_aks_online_endpoint_ws
           SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
-        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/
+        working-directory: /home/runner/work/azml-aks-online-endpoint/azml-aks-online-endpoint/azml_files/
         run: |
            export run_id_2=$(az ml job create --file ./jobs/automl_automode.yaml --workspace-name $WORKSPACE --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --output json | jq -r .display_name) 
             echo "run_id_2=$run_id_2" >> $GITHUB_ENV
