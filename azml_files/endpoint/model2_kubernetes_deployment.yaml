@@ -7,11 +7,23 @@ instance_type: gpumodel2
 environment: 
   conda_file: ../../azureml-examples/cli/endpoints/online/model-1/environment/conda.yaml
   image: mcr.microsoft.com/azureml/openmpi4.1.0-cuda11.3-cudnn8-ubuntu20.04:latest
+  inference_config:
+    liveness_route:
+      port: 5001
+      path: /
+    readiness_route:
+      port: 5001
+      path: /
+    scoring_route:
+      port: 5001
+      path: /score
 request_settings:
   request_timeout_ms: 3000
   max_queue_wait_ms: 3000
 tags:
   tag1: deployment-tag2-value
+environment_variables:
+  MLFLOW_MODEL_FOLDER: model
 instance_count: 1
 scale_settings:
   type: target_utilization
