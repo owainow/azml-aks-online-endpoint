@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/kubernetesOnlineDeployment.schema.json
 name: blue
 type: kubernetes
-endpoint_name: my-endpoint
+endpoint_name: iris-model1
 model:
   path: ../../azureml-examples/cli/endpoints/online/model-1/model/
 code_configuration:
